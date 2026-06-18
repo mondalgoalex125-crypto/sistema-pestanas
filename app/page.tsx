@@ -61,14 +61,27 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <header className="max-w-3xl mx-auto text-center py-16 px-4">
-        <h1 className="text-4xl md:text-5xl font-light tracking-tight text-stone-950">
-          Resalta el poder de <span className="font-serif italic text-amber-700">tu mirada</span>
-        </h1>
-        <p className="mt-4 text-stone-500 font-light max-w-lg mx-auto">
-          Selecciona el servicio de tu preferencia y agenda una experiencia de belleza personalizada de manera inmediata.
-        </p>
-      </header>
+      <header className="flex justify-between items-center p-6 bg-white/80 backdrop-blur-md border-b border-stone-100 sticky top-0 z-50">
+  <div className="text-xl font-serif tracking-widest text-stone-900 font-bold">
+    LASH <span className="font-light text-stone-400">|</span> & CO.
+  </div>
+  <div className="flex items-center gap-4">
+    {/* Botón Secreto de Acceso Administrativo */}
+    <a 
+      href="/login" 
+      className="text-stone-500 hover:text-stone-900 text-xs uppercase tracking-wider font-medium transition-colors duration-200"
+    >
+      Ingreso Staff
+    </a>
+    
+    <a 
+      href="#reserva" 
+      className="bg-stone-950 hover:bg-stone-850 text-white text-xxs uppercase tracking-widest font-bold px-5 py-2.5 rounded-full transition-all duration-200 shadow-sm"
+    >
+      Citas en Línea
+    </a>
+  </div>
+</header>
 
       <div className="max-w-6xl mx-auto px-4 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
         
