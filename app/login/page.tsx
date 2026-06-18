@@ -47,7 +47,8 @@ export default function LoginPage() {
         <span className="text-xs bg-stone-900 text-stone-100 px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
           Portal de Acceso
         </span>
-        <h1 className="text-2xl font-serif text-stone-950 mt-6">Bienvenido a Lash & Co.</h1>
+        // Dentro del bloque de render en app/login/page.tsx cambia el h1:
+        <h1 className="text-2xl font-serif text-stone-950 mt-6">Bienvenido a Karen Lash.</h1>
         <p className="text-stone-500 text-xs font-light mt-2 mb-8">
           Identifícate de forma segura para acceder a tus paneles correspondientes.
         </p>

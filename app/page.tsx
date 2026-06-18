@@ -4,191 +4,195 @@ import { useState } from 'react';
 import { db } from './lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const SERVICIOS = [
-  { id: '1', nombre: 'Extensiones Clásicas', precio: 'S/. 80', duracion: '1h 30m', desc: 'Efecto rímel natural y elegante, una extensión por cada pestaña propia.' },
-  { id: '2', nombre: 'Volumen Ruso', precio: 'S/. 120', duracion: '2h 15m', desc: 'Máxima densidad, profundidad y volumen con abanicos ultra ligeros.' },
-  { id: '3', nombre: 'Lifting de Pestañas', precio: 'S/. 60', duracion: '45m', desc: 'Curvatura natural desde la raíz, incluye tratamiento de nutrición y tinte.' },
-];
-
 export default function Home() {
-  const [servicioSeleccionado, setServicioSeleccionado] = useState('');
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [servicio, setServicio] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
-  const [cargando, setCargando] = useState(false);
-  const [enviado, setEnviado] = useState(false);
+  const [procesando, setProcesando] = useState(false);
 
-  const handleReserva = async (e: React.FormEvent) => {
+  const servicios = [
+    { id: '1', nombre: 'Extensiones Clásicas', precio: 'S/. 80', duracion: '1h 30m', desc: 'Efecto rímel natural y sofisticado, una extensión por cada pestaña propia.' },
+    { id: '2', nombre: 'Volumen Ruso', precio: 'S/. 120', duracion: '2h 15m', desc: 'Máxima densidad, profundidad y volumen de impacto con abanicos ultra ligeros.' },
+    { id: '3', nombre: 'Lifting de Pestañas', precio: 'S/. 60', duracion: '45m', desc: 'Curvatura natural desde la raíz que incluye tratamiento de nutrición y tinte.' }
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!servicioSeleccionado) return;
-    
-    setCargando(true);
+    if (!nombre || !telefono || !servicio || !fecha || !hora) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    setProcesando(true);
     try {
-      // Guardando los datos en tiempo real en la colección 'citas' de Firestore
       await addDoc(collection(db, 'citas'), {
         cliente: nombre,
         telefono: telefono,
-        servicio: servicioSeleccionado,
+        servicio: servicio,
         fecha: fecha,
         hora: hora,
         estado: 'Pendiente',
         creadoEn: serverTimestamp()
       });
-      
-      setEnviado(true);
-      // Limpiar campos
+      alert("¡Tu solicitud de cita ha sido registrada con éxito! Nos comunicaremos contigo por WhatsApp.");
       setNombre('');
       setTelefono('');
+      setServicio('');
       setFecha('');
       setHora('');
     } catch (error) {
       console.error("Error al guardar la cita: ", error);
-      alert("Hubo un error al procesar tu cita. Inténtalo de nuevo.");
+      alert("Hubo un problema al registrar tu cita. Inténtalo de nuevo.");
     } finally {
-      setCargando(false);
+      setProcesando(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5] text-stone-800 antialiased selection:bg-amber-200">
-      {/* Navbar Minimalista */}
-      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200/60 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <span className="text-xl font-bold tracking-widest text-stone-900 uppercase">Lash & Co.</span>
-          <span className="text-xs bg-stone-900 text-stone-100 px-3 py-1 rounded-full uppercase tracking-wider font-semibold">Citas En Línea</span>
+    <div className="min-h-screen bg-[#FAF8F5] text-stone-800 font-sans antialiased">
+      
+      {/* HEADER ÚNICO Y CORREGIDO */}
+      <header className="flex justify-between items-center p-6 bg-white/90 backdrop-blur-md border-b border-stone-100 sticky top-0 z-50">
+        <div className="text-xl font-serif tracking-widest text-stone-900 font-black">
+          KAREN <span className="font-light text-amber-600">LASH</span>
         </div>
-      </nav>
+        <div className="flex items-center gap-6">
+          <a 
+            href="/login" 
+            className="text-stone-500 hover:text-amber-600 text-xs uppercase tracking-wider font-semibold transition-colors duration-200"
+          >
+            Ingreso Staff
+          </a>
+          <a 
+            href="#reserva" 
+            className="bg-amber-600 hover:bg-amber-700 text-white text-xs uppercase tracking-widest font-bold px-5 py-2.5 rounded-full transition-all duration-200 shadow-md shadow-amber-600/10"
+          >
+            Citas en Línea
+          </a>
+        </div>
+      </header>
 
-      {/* Hero */}
-      <header className="flex justify-between items-center p-6 bg-white/80 backdrop-blur-md border-b border-stone-100 sticky top-0 z-50">
-  <div className="text-xl font-serif tracking-widest text-stone-900 font-bold">
-    LASH <span className="font-light text-stone-400">|</span> & CO.
-  </div>
-  <div className="flex items-center gap-4">
-    {/* Botón Secreto de Acceso Administrativo */}
-    <a 
-      href="/login" 
-      className="text-stone-500 hover:text-stone-900 text-xs uppercase tracking-wider font-medium transition-colors duration-200"
-    >
-      Ingreso Staff
-    </a>
-    
-    <a 
-      href="#reserva" 
-      className="bg-stone-950 hover:bg-stone-850 text-white text-xxs uppercase tracking-widest font-bold px-5 py-2.5 rounded-full transition-all duration-200 shadow-sm"
-    >
-      Citas en Línea
-    </a>
-  </div>
-</header>
-
-      <div className="max-w-6xl mx-auto px-4 pb-24 grid grid-cols-1 lg:grid-cols-12 gap-12">
+      {/* HERO SECTION LLAMATIVO */}
+      <main className="max-w-6xl mx-auto px-6 py-12 md:py-20 grid md:grid-cols-12 gap-12 items-start">
         
-        {/* Catálogo de Servicios */}
-        <section className="lg:col-span-7 space-y-4">
-          <h2 className="text-xs uppercase tracking-widest font-bold text-stone-400 mb-2">Servicios Disponibles</h2>
-          {SERVICIOS.map((item) => (
-            <div 
-              key={item.id} 
-              onClick={() => setServicioSeleccionado(item.nombre)}
-              className={`p-6 rounded-2xl bg-white border transition-all duration-300 cursor-pointer relative overflow-hidden group ${
-                servicioSeleccionado === item.nombre 
-                  ? 'border-amber-600 shadow-md shadow-amber-100/50 translate-x-1' 
-                  : 'border-stone-200 hover:border-stone-400'
-              }`}
-            >
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <h3 className="font-medium text-lg text-stone-900 group-hover:text-amber-800 transition-colors">{item.nombre}</h3>
-                  <p className="text-sm text-stone-500 font-light mt-1.5 leading-relaxed">{item.desc}</p>
+        <div className="md:col-span-7 space-y-8">
+          <div className="space-y-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+              Salta, Argentina • Studio Premium
+            </span>
+            <h1 className="text-4xl md:text-6xl font-serif text-stone-950 leading-tight">
+              Resalta el poder de <br />
+              <span className="italic text-amber-600 font-normal">tu mirada</span>
+            </h1>
+            <p className="text-stone-500 text-sm md:text-base font-light max-w-md leading-relaxed">
+              Diseño de pestañas personalizado de nivel internacional. Agenda una experiencia exclusiva en el corazón de Salta de manera inmediata.
+            </p>
+          </div>
+
+          {/* LISTA DE SERVICIOS */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400">Servicios Disponibles</h3>
+            <div className="space-y-3">
+              {servicios.map((s) => (
+                <div 
+                  key={s.id}
+                  onClick={() => setServicio(s.nombre)}
+                  className={`p-5 rounded-2xl border bg-white transition-all duration-300 cursor-pointer flex justify-between items-center gap-4 hover:shadow-md ${
+                    servicio === s.nombre ? 'border-amber-500 ring-1 ring-amber-500/50 bg-amber-50/20' : 'border-stone-200/80'
+                  }`}
+                >
+                  <div className="space-y-1">
+                    <h4 className="font-serif font-bold text-stone-900 text-base">{s.nombre}</h4>
+                    <p className="text-stone-400 font-light text-xs max-w-sm">{s.desc}</p>
+                    <span className="inline-block text-xxs text-stone-400 font-mono bg-stone-50 px-2 py-0.5 rounded mt-1">⏳ {s.duracion}</span>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-lg font-serif font-black text-amber-600">{s.precio}</span>
+                  </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <span className="text-lg font-semibold text-stone-900">{item.precio}</span>
-                  <div className="text-xs text-stone-400 mt-1 font-mono">⏳ {item.duracion}</div>
-                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* FORMULARIO DE RESERVA DE CITAS */}
+        <div id="reserva" className="md:col-span-5 bg-white border border-stone-200/80 rounded-3xl p-8 shadow-xl shadow-stone-200/40 sticky top-28">
+          <div className="mb-6">
+            <h2 className="text-xl font-serif font-bold text-stone-900">Formulario de Reserva</h2>
+            <p className="text-stone-400 text-xs font-light mt-1">Ingresa tus datos a continuación</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-stone-400 font-medium text-xxs uppercase tracking-wider mb-1.5">Nombre Completo</label>
+              <input 
+                type="text" 
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Ej. Ariana Medina" 
+                className="w-full bg-stone-50 border border-stone-200 focus:border-amber-500 focus:bg-white text-stone-900 text-xs py-3 px-4 rounded-xl transition outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-stone-400 font-medium text-xxs uppercase tracking-wider mb-1.5">WhatsApp de Contacto</label>
+              <input 
+                type="tel" 
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                placeholder="Ej. 387123456" 
+                className="w-full bg-stone-50 border border-stone-200 focus:border-amber-500 focus:bg-white text-stone-900 text-xs py-3 px-4 rounded-xl transition outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-stone-400 font-medium text-xxs uppercase tracking-wider mb-1.5">Servicio Elegido</label>
+              <select 
+                value={servicio}
+                onChange={(e) => setServicio(e.target.value)}
+                className="w-full bg-stone-50 border border-stone-200 focus:border-amber-500 focus:bg-white text-stone-900 text-xs py-3 px-4 rounded-xl transition outline-none appearance-none"
+              >
+                <option value="">Selecciona un servicio de la lista</option>
+                {servicios.map((s) => (
+                  <option key={s.id} value={s.nombre}>{s.nombre} ({s.precio})</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-stone-400 font-medium text-xxs uppercase tracking-wider mb-1.5">Fecha</label>
+                <input 
+                  type="date" 
+                  value={fecha}
+                  onChange={(e) => setFecha(e.target.value)}
+                  className="w-full bg-stone-50 border border-stone-200 focus:border-amber-500 focus:bg-white text-stone-900 text-xs py-3 px-4 rounded-xl transition outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-stone-400 font-medium text-xxs uppercase tracking-wider mb-1.5">Hora</label>
+                <input 
+                  type="time" 
+                  value={hora}
+                  onChange={(e) => setHora(e.target.value)}
+                  className="w-full bg-stone-50 border border-stone-200 focus:border-amber-500 focus:bg-white text-stone-900 text-xs py-3 px-4 rounded-xl transition outline-none"
+                />
               </div>
             </div>
-          ))}
-        </section>
 
-        {/* Formulario Dinámico */}
-        <section className="lg:col-span-5">
-          <div className="bg-white p-8 rounded-3xl border border-stone-200/80 shadow-sm sticky top-24">
-            <h2 className="text-xl font-medium text-stone-900 tracking-tight">Formulario de Reserva</h2>
-            <p className="text-xs text-stone-400 font-light mt-1 mb-6">Ingresa tus datos a continuación</p>
+            <button 
+              type="submit"
+              disabled={procesando}
+              className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-widest py-4 rounded-xl mt-4 transition-all shadow-md shadow-amber-600/10"
+            >
+              {procesando ? 'Procesando...' : 'Confirmar Solicitud'}
+            </button>
+          </form>
+        </div>
 
-            {enviado ? (
-              <div className="py-8 text-center animate-fade-in">
-                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
-                <h3 className="text-stone-900 font-medium text-xl mt-4">¡Solicitud Procesada!</h3>
-                <p className="text-stone-500 text-sm font-light mt-2 px-4">Tu espacio ha sido apartado exitosamente. Nos pondremos en contacto vía WhatsApp.</p>
-                <button 
-                  onClick={() => setEnviado(false)}
-                  className="mt-8 text-xs uppercase tracking-widest font-bold text-amber-700 hover:text-amber-900 transition-colors"
-                >
-                  Registrar otra cita
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleReserva} className="space-y-4">
-                <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-stone-500 mb-1.5">Nombre Completo</label>
-                  <input 
-                    type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-stone-900 focus:ring-1 focus:ring-stone-950 outline-none transition bg-stone-50/50 text-sm"
-                    placeholder="Ej. Ariana Medina"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-stone-500 mb-1.5">WhatsApp de Contacto</label>
-                  <input 
-                    type="tel" required value={telefono} onChange={(e) => setTelefono(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-stone-900 focus:ring-1 focus:ring-stone-950 outline-none transition bg-stone-50/50 text-sm"
-                    placeholder="Ej. 912345678"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs uppercase tracking-wider font-semibold text-stone-500 mb-1.5">Servicio Elegido</label>
-                  <input 
-                    type="text" disabled required value={servicioSeleccionado}
-                    className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-100 text-stone-600 text-sm font-medium cursor-not-allowed"
-                    placeholder="Selecciona un servicio de la lista"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-stone-500 mb-1.5">Fecha</label>
-                    <input 
-                      type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-stone-900 focus:ring-1 focus:ring-stone-950 outline-none transition bg-stone-50/50 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-stone-500 mb-1.5">Hora</label>
-                    <input 
-                      type="time" required value={hora} onChange={(e) => setHora(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-stone-900 focus:ring-1 focus:ring-stone-950 outline-none transition bg-stone-50/50 text-sm"
-                    />
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  disabled={!servicioSeleccionado || cargando}
-                  className="w-full mt-4 bg-stone-900 hover:bg-stone-800 text-white text-xs uppercase tracking-widest font-bold py-4 px-4 rounded-xl shadow-lg transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {cargando ? 'Procesando...' : 'Confirmar Solicitud'}
-                </button>
-              </form>
-            )}
-          </div>
-        </section>
-
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
